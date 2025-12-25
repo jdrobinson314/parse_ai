@@ -61,6 +61,7 @@ You can customize how files are named and organized using flags.
 | :---- | :---- | :---- | :---- |
 | `--add-numbering` | `-n` | **Chronological Sorting**. Prepends `001_`, `002_` to files. Useful for tracking code evolution. | `001_script.py`, `002_updated_script.py` |
 | `--strip` | `-s` | **Prefix Removal**. Strips specific regex patterns from filenames. Can be used multiple times. | `--strip "^py_" --strip "^sh_"` |
+| `--reconstruct` | `-r` | **Structure Recovery**. Project flat filenames into directories using underscores. | `src_main.py` -> `src/main.py` |
 | `--help` | `-h` | Show full help message. |  |
 
 **Example Command:**
@@ -68,6 +69,9 @@ You can customize how files are named and organized using flags.
 ```bash
 # Run with numbering enabled and strip "temp_" from filenames
 ./parser_ai/run_parser.sh -n --strip "^temp_"
+
+# Reconstruct directory structure from underscores
+./parser_ai/run_parser.sh --reconstruct
 ```
 
 ## **🧠 Intelligent Code Extraction**
@@ -128,6 +132,8 @@ Sometimes the AI puts the filename in its own tiny code block before the actual 
 * [**Plugin Roadmap**](parser_ai/docs/PLUGIN_ROADMAP.md): Plans for supporting other LLM export formats.  
 * [**Prompting Guide**](parser_ai/docs/REGEX_AND_PROMPTING_GUIDE.md): **Crucial Reading.** Learn how to prompt Google AI Studio to output code in the format ParseAI likes best (System Prompts included).
 * [**System Prompts & Naming**](HOWTO_PROMPTING_AND_NAMING.md): Detailed guide on how strict system prompts work with ParseAI's automatic renaming and versioning features.
+* [**User Guide**](parser_ai/docs/USER_GUIDE.md): Complete instructions on installation, usage, and command-line arguments.
+* [**Source Code Reference**](parser_ai/docs/SOURCE_CODE_REFERENCE.md): A technical look at the internal logic of ParseAI's modules.
 
 ## **License**
 

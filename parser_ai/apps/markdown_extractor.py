@@ -9,6 +9,7 @@ def main():
     parser.add_argument("--parse", action='append', help="Custom regex pattern for filename detection. Capture group 1 must be the filename.", default=[])
     parser.add_argument("--add-numbering", "-n", action='store_true', help="Prepend sequential numbers to extracted filenames (e.g. 001_file.py).")
     parser.add_argument("--strip", "-s", action='append', help="Regex pattern to strip from start of filenames (e.g. '^py_').", default=[])
+    parser.add_argument("--reconstruct", "-r", action='store_true', help="Reconstruct directory structure from flat filenames (e.g. src_main.py -> src/main.py).")
     args, unknown = parser.parse_known_args()
 
     input_path = os.path.abspath(args.input_file)
@@ -33,7 +34,8 @@ def main():
             filename, 
             custom_patterns=args.parse,
             add_numbering=args.add_numbering,
-            strip_patterns=args.strip
+            strip_patterns=args.strip,
+            reconstruct=args.reconstruct
         )
         
         if num_files > 0:

@@ -37,7 +37,7 @@ class CodeExtractor:
             re.DOTALL | re.MULTILINE
         )
 
-    def extract_from_text(self, text, source_filename, custom_patterns=None, add_numbering=False, strip_patterns=None):
+    def extract_from_text(self, text, source_filename, custom_patterns=None, add_numbering=False, strip_patterns=None, reconstruct=False):
         """
         Parses text for ALL code blocks and writes them to disk sequentially.
         Ignores headers or filenames in the text.
@@ -48,6 +48,8 @@ class CodeExtractor:
         
         dir_blocks = os.path.join(base_extraction_dir, "code_blocks")
         dir_files = os.path.join(base_extraction_dir, "files")
+        # New: Reconstructed directory
+        dir_reconstructed = os.path.join(base_extraction_dir, "reconstructed")
 
         manifest = []
         count = 0
@@ -108,7 +110,12 @@ class CodeExtractor:
 
         if events:
             # Create subdirectories
-            for d in [dir_blocks, dir_files]:
+            # Always create blocks and files
+            dirs_to_create = [dir_blocks, dir_files]
+            if reconstruct:
+                dirs_to_create.append(dir_reconstructed)
+
+            for d in dirs_to_create:
                 if not os.path.exists(d):
                     os.makedirs(d)
 
@@ -125,7 +132,6 @@ class CodeExtractor:
             
             # File creation counter for numbering feature
             file_creation_count = 0 
-
 
             for event in events:
                 if event['type'] == 'filename':
@@ -179,49 +185,65 @@ class CodeExtractor:
                     # Determine target filename (Inline takes precedence over Header)
                     target_filename = inline_filename if inline_filename else current_filename
 
-                    # 2. If Associated: Write to Files folder
+                    # 2. If Associated: Write to Files folder (and optionally Reconstructed)
                     if target_filename:
                         entry["associated_filename"] = target_filename
-                        sanitized_assoc = self.sanitize_filename(os.path.basename(target_filename))
                         
-                        # --- Advanced Naming Logic ---
+                        # --- COMMON PRE-PROCESSING ---
+                        # Base sanitization
+                        base_sanitized = self.sanitize_filename(os.path.basename(target_filename))
                         
-                        # A. Strip Prefixes (String/Regex)
+                        # A. Strip Prefixes (String/Regex) - Applies to ALL potential outputs
                         if strip_patterns:
                             for pattern in strip_patterns:
-                                # Regex removal (match from start to prune logic prefixes like "py_")
                                 if pattern:
-                                    sanitized_assoc = re.sub(pattern, '', sanitized_assoc)
+                                    base_sanitized = re.sub(pattern, '', base_sanitized)
                         
-                        # B. Add Numbering (Chronological Prefix)
                         file_creation_count += 1
+                        
+                        # Define Numbering Prefix
+                        num_prefix = ""
                         if add_numbering:
-                            # Use 3 digits, e.g., 001_file.py
-                            sanitized_assoc = f"{file_creation_count:03d}_{sanitized_assoc}"
-                        
-                        # --- End Advanced Naming Logic ---
+                             num_prefix = f"{file_creation_count:03d}_"
 
-                        dest_path = os.path.join(dir_files, sanitized_assoc)
+
+                        # --- PATH 1: FLAT FILES (Default) ---
+                        # Logic: Numbering + Stripped Name
+                        flat_name = f"{num_prefix}{base_sanitized}"
+                        dest_path_flat = os.path.join(dir_files, flat_name)
                         
-                        try:
-                            # Check if file exists (Real vs Ghost - though Ghosts are gone now)
-                            if os.path.exists(dest_path):
-                                # Rotate!
-                                current_v = file_versions.get(sanitized_assoc, 1)
-                                self.rotate_file(dest_path, current_v)
-                                file_versions[sanitized_assoc] = current_v + 1
+                        self._save_content_safely(dest_path_flat, content, file_versions)
+                        entry["saved_as"] = flat_name
+
+                        # --- PATH 2: RECONSTRUCTED (Optional) ---
+                        if reconstruct:
+                            # Logic: Reconstruct directory structure from underscores
+                            # 1. Split filename (minus extension)
+                            base, ext = os.path.splitext(base_sanitized)
                             
-                            # Write new content
-                            # Only write if content is not empty (double check, though 'strip' helps)
-                            if content:
-                                with open(dest_path, 'w', encoding='utf-8') as f:
-                                    f.write(event['content'])
-                                print(f"Populated file: {dest_path}")
-                            else:
-                                print(f"Skipping empty content for {dest_path}")
+                            reconstructed_rel_path = base_sanitized # Default fallback
+                            
+                            if '_' in base:
+                                parts = base.split('_')
+                                parts[-1] += ext
+                                reconstructed_rel_path = os.path.join(*parts)
+                            
+                            # Apply Numbering to the ROOT
+                            # If numbering is on: 001_src/backend/main.py
+                            final_reconstructed_name = f"{num_prefix}{reconstructed_rel_path}"
+                            
+                            dest_path_reconstructed = os.path.join(dir_reconstructed, final_reconstructed_name)
+                            
+                            # We track versions separately for reconstructed? 
+                            # Or just overwrite? 
+                            # Let's share the versioning logic but usually reconstruction implies structure is unique.
+                            # However, to be safe, we use the same safe save.
+                            self._save_content_safely(dest_path_reconstructed, content, {}) # Use fresh version dict or shared?
+                            # Using empty dict means it won't rotate based on previous FLAT versions, which is correct.
+                            # It will rotate if ITSELF clashes.
+                            
+                            entry["reconstructed_path"] = final_reconstructed_name
 
-                        except Exception as e:
-                            print(f"Failed to populate {dest_path}: {e}")
 
                         # Consume the header context since we've processed a block
                         current_filename = None 
@@ -326,4 +348,37 @@ class CodeExtractor:
         except Exception as e:
             print(f"Failed to write {output_path}: {e}")
             return output_path # Return best guess for manifest even on error?
+
+
+    def _save_content_safely(self, dest_path, content, version_dict):
+        """
+        Helper to write content to dest_path, handling headers, version rotation,
+        and parent directory creation.
+        """
+        try:
+            # Check if file exists
+            if os.path.exists(dest_path):
+                # Rotate!
+                # We use the full path as key to avoid collisions between files/foo.py and reconstructed/foo.py if they share a dict
+                key = dest_path 
+                
+                current_v = version_dict.get(key, 1)
+                self.rotate_file(dest_path, current_v)
+                version_dict[key] = current_v + 1
+            
+            # Write new content
+            if content:
+                # Ensure validation of directory existence
+                parent_dir = os.path.dirname(dest_path)
+                if not os.path.exists(parent_dir):
+                    os.makedirs(parent_dir)
+
+                with open(dest_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                print(f"Populated file: {dest_path}")
+            else:
+                print(f"Skipping empty content for {dest_path}")
+
+        except Exception as e:
+            print(f"Failed to populate {dest_path}: {e}")
 
