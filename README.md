@@ -1,112 +1,125 @@
-# ParseAI
+# **ParseAI: Google AI Studio Log Parser**
 
-ParseAI is a tool designed to process JSON conversation logs, converting them into readable text formats and automatically extracting code blocks into organized file structures.
+The Missing Link for AI Studio Workflows  
+ParseAI bridges the gap between Google AI Studio's raw JSON exports and a usable local development environment. It turns conversation logs into readable documentation and automatically refactors code blocks into actual files.
 
-## Overview
+## **🚀 Why ParseAI?**
 
-The core functionality involves:
-1.  **Ingestion**: Reading JSON files from the `ingest/` directory.
-2.  **Parsing**: Converting the JSON structure (roles, text, thoughts) into a readable format.
-3.  **Extraction**: Scanning the parsed text for file definitions and extracting them to disk.
+Google AI Studio is powerful, but extracting your work can be tedious. When you export a conversation, you get a complex JSON file containing metadata, "thought" chains, and mixed formatting.
 
-## Usage
+**ParseAI solves this by:**
 
-### Quick Start
+1. **Decoding the Context**: It strips away the JSON noise, presenting the conversation (including hidden "thoughts") in a clean, human-readable format.  
+2. **Liberating the Code**: It acts as a virtual file system parser. If the AI writes code in the chat, ParseAI detects it, names it, and saves it to your disk automatically.
 
-The easiest way to run ParseAI is using the launcher script:
+## **⚙️ Core Workflow**
 
-```bash
-./parser_ai/run_parser.sh
-```
+The tool operates on a simple "Ingest → Process → Extract" pipeline:
 
-This will:
-- Process all files in `ingest/`.
-- Output text files to `output/`.
-- Extract code files to subdirectories in `output/`.
+1. **Export**: Download your session as JSON from Google AI Studio.  
+2. **Ingest**: Drop the JSON file into the ingest/ folder.  
+3. **Run**: Execute the parser script.  
+4. **Result**:  
+   * **Readable Logs**: A formatted text file appears in output/ (e.g., MySession\_parsed.txt).  
+   * **Source Code**: A folder appears (e.g., output/MySession\_files/) containing every script, config, or snippet the AI generated.
 
-### Command Line Options
+## **🛠️ Installation & Setup**
 
-```bash
-./parser_ai/run_parser.sh --help
-```
+### **Prerequisites**
 
-**Advanced Naming Options:**
-*   `--add-numbering` / `-n`: Prepend sequential numbers (e.g. `001_script.py`) to keep files sorted chronologically.
-*   `--strip "REGEX"` / `-s "REGEX"`: Remove unwanted prefixes from filenames. Can be used multiple times.
-    *   Example: `--strip "^py_" --strip "^sh_"` transforms `py_main.py` -> `main.py`.
+* **Python 3.6+** (Standard on most Linux distributions)  
+* No complex virtual environment required for standard use.
 
-## Features
+### **Quick Setup**
 
-### 1. Conversational Parsing
-Converts raw JSON logs into a human-readable chat format.
-- Handles standard user/model turns.
-- Separates "thought" blocks from the final response.
-- Extracts run metadata (model, temperature, etc.).
+\# 1\. Clone the repository  
+git clone \[https://github.com/your-username/ParseAI.git\](https://github.com/your-username/ParseAI.git)  
+cd ParseAI
 
-### 2. Automatic Code Extraction
-The parser looks for specific patterns in the AI's response to identify and extract files.
+\# 2\. Ensure execution permissions (Linux/Mac)  
+chmod \+x parser\_ai/run\_parser.sh
 
-**Supported Patterns (Default):**
+## **💻 Usage**
 
-The parser uses a variety of strategies to detect filenames. It scans for:
+### **Basic Execution**
 
-1.  **Code Fence (The "Golden Standard")**:
-    The most reliable method. Specify the filename directly in the language tag.
-    ```markdown
-    ```python: src/main.py
-    print("code")
-    ```
-    ```
+The included launcher script handles path discovery and execution.
 
-2.  **Explicit Headers**:
-    ```text
-    ### File 1: script.py
-    ```
+./parser\_ai/run\_parser.sh
 
-3.  **Natural Language Instructions**:
-    *   `Save this as: utils.py`
-    *   `File: config.json`
-    *   `Filename: Dockerfile`
-    *   `Create app.py` (Must have a file extension to be detected)
+*This processes every JSON file found in ingest/ and saves results to output/.*
 
-4.  **Tiny Block Heuristic**:
-    If a code block is very short (<100 chars), has no spaces or newlines, and looks like a filename, it is treated as a file declaration for the *next* code block.
-    ```markdown
-    ```text
-    path/to/file.js
-    ```
-    ```
+### **Command Line Arguments**
 
-5.  **Custom Patterns**:
-    Define your own using the `--parse` argument.
+You can customize how files are named and organized using flags.
 
-**Extraction Logic:**
-1.  Creates a subdirectory named after the source file (e.g., `MyLog_files/`).
-2.  Saves the code block to the detected filename.
-3.  **Precedence**: Inline filenames (Method 1) > Tiny Block (Method 4) > Header Association (Methods 2 & 3).
-4.  Duplicate files are handled gracefully; header declarations without code blocks are ignored (no 0-byte ghost files).
+| Flag | Short | Description | Example |
+| :---- | :---- | :---- | :---- |
+| \--add-numbering | \-n | **Chronological Sorting**. Prepends 001\_, 002\_ to files. Useful for tracking code evolution. | 001\_script.py, 002\_updated\_script.py |
+| \--strip | \-s | **Prefix Removal**. Strips specific regex patterns from filenames. Can be used multiple times. | \--strip "^py\_" \--strip "^sh\_" |
+| \--help | \-h | Show full help message. |  |
 
-## Documentation
+**Example Command:**
 
-*   [**Plugin Roadmap**](parser_ai/docs/PLUGIN_ROADMAP.md) - Future plans for extensibility.
-*   [**Advanced Regex & Prompting Guide**](parser_ai/docs/REGEX_AND_PROMPTING_GUIDE.md) - **Read this!** How to control file naming with custom regex and System Prompts for Google AI Studio/ChatGPT.
+\# Run with numbering enabled and strip "temp\_" from filenames  
+./parser\_ai/run\_parser.sh \-n \--strip "^temp\_"
 
-## Directory Structure
+## **🧠 Intelligent Code Extraction**
 
-```text
-.
-├── ingest/                  # Place your JSON logs here
-├── parser_ai/
-│   ├── apps/
-│   │   ├── json_parser.py   # Main logic
-│   │   └── extractor.py     # Code extraction module
-│   ├── docs/                # Documentation
-│   └── run_parser.sh        # Launcher script
-├── output/                  # Generated files go here
+ParseAI uses a multi-layered heuristic engine to determine where code should go. It scans your AI conversation for specific cues.
+
+### **1\. The "Golden Standard" (Code Fence)**
+
+The most robust method. If the language tag in the markdown code block includes a colon and a path, ParseAI uses it immediately.
+
+**Input in AI Studio:**
+
+Here is the updated server code:  
+\`\`\`python:src/backend/server.py  
+print("Starting server...")  
+\`\`\`
+
+**Output on Disk:**
+
+output/SessionName\_files/src/backend/server.py
+
+### **2\. Header Association**
+
+If no filename is in the fence, the parser looks at the line immediately preceding the block.
+
+* \#\#\# File: script.js  
+* \*\*Filename: config.json\*\*  
+* Save this as: main.py
+
+### **3\. The "Tiny Block" Heuristic**
+
+Sometimes the AI puts the filename in its own tiny code block before the actual code.
+
+* If a block is \<100 chars, has no spaces, and looks like a path, it becomes the name for the *next* block.
+
+### **4\. Duplicate Handling**
+
+* **Version Control**: If main.py is generated three times in one conversation, ParseAI will overwrite it sequentially by default, ensuring you have the *final* version.  
+* **Numbering**: Use \-n if you want to keep all versions (001\_main.py, 005\_main.py).
+
+## **📂 Directory Structure**
+
+.  
+├── ingest/                  \# DROP ZONE: Place Google AI Studio JSON exports here  
+├── parser\_ai/               \# Core Application Code  
+│   ├── apps/  
+│   │   ├── json\_parser.py   \# Log processing logic  
+│   │   └── extractor.py     \# Regex & file saving logic  
+│   ├── docs/                \# Extended Documentation  
+│   └── run\_parser.sh        \# Entry point script  
+├── output/                  \# ARTIFACTS: Generated logs and extracted code  
 └── README.md
 
-## License
+## **📚 Documentation & Resources**
 
-This project is licensed under the terms of the MIT License. See [LICENSE](LICENSE) for details.
-\
-© 2025 James D. Robinson, and Gemini
+* [**Plugin Roadmap**](https://www.google.com/search?q=parser_ai/docs/PLUGIN_ROADMAP.md): Plans for supporting other LLM export formats.  
+* [**Prompting Guide**](https://www.google.com/search?q=parser_ai/docs/REGEX_AND_PROMPTING_GUIDE.md): **Crucial Reading.** Learn how to prompt Google AI Studio to output code in the format ParseAI likes best (System Prompts included).
+
+## **License**
+
+© 2025 James D. Robinson, and Gemini. Licensed under MIT.
