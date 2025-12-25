@@ -71,7 +71,7 @@ You can customize how files are named and organized using flags.
 # Run with numbering enabled and strip "temp_" from filenames
 ./parser_ai/run_parser.sh -n --strip "^temp_"
 
-# Reconstruct directory structure from underscores
+# Reconstruct directory structure from explicit paths
 ./parser_ai/run_parser.sh --reconstruct
 
 # Reconstruct and MERGE into a clean project structure (recommended)
@@ -84,21 +84,23 @@ ParseAI uses a multi-layered heuristic engine to determine where code should go.
 
 ### **1. The "Golden Standard" (Code Fence)**
 
-*   If a filename is in the format `folder_file.ext`, you can use `--reconstruct` to automatically build the directory structure.
+### **1. The "Golden Standard" (Explicit Paths)**
+
+*   If a filename in the code fence includes a path (e.g. `src/server.py`), use `--reconstruct` to automatically build that directory structure.
 
 **Input in AI Studio:**
 ```text
 > Here is the updated server code:
-> ```python:output/SessionName_files/filessrc_backend_server.py
+> ```python:src/backend/server.py
 > print("Starting server...")
 > ```
 ```
 
 **Output on Disk (Default):**
-`output/SessionName_files/files/src_backend_server.py`
+`output/SessionName_files/files/src_backend_server.py` (Flattened for safety)
 
 **Output on Disk (with `--reconstruct`):**
-`output/SessionName_files/reconstructed/src/backend/server.py`
+`output/SessionName_files/reconstructed/src/backend/server.py` (Nested Logic)
 
 ### **2. Header Association**
 
