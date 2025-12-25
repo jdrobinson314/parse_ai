@@ -85,9 +85,9 @@ ParseAI uses a multi-layered heuristic engine to determine where code should go.
 **Input in AI Studio:**
 
 > Here is the updated server code:
-> ```python:src_backend_server.py
+> `\`\`\python:src_backend_server.py
 > print("Starting server...")
-> ```
+> \`\`\`
 
 **Output on Disk (Default):**
 `output/SessionName_files/files/src_backend_server.py`
