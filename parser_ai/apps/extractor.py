@@ -37,7 +37,7 @@ class CodeExtractor:
             re.DOTALL | re.MULTILINE
         )
 
-    def extract_from_text(self, text, source_filename, custom_patterns=None):
+    def extract_from_text(self, text, source_filename, custom_patterns=None, add_numbering=False, strip_patterns=None):
         """
         Parses text for ALL code blocks and writes them to disk sequentially.
         Ignores headers or filenames in the text.
@@ -122,6 +122,10 @@ class CodeExtractor:
             current_filename = None
             processed_filenames = set()
             file_versions = {} # Track version count for each file
+            
+            # File creation counter for numbering feature
+            file_creation_count = 0 
+
 
             for event in events:
                 if event['type'] == 'filename':
@@ -179,6 +183,24 @@ class CodeExtractor:
                     if target_filename:
                         entry["associated_filename"] = target_filename
                         sanitized_assoc = self.sanitize_filename(os.path.basename(target_filename))
+                        
+                        # --- Advanced Naming Logic ---
+                        
+                        # A. Strip Prefixes (String/Regex)
+                        if strip_patterns:
+                            for pattern in strip_patterns:
+                                # Regex removal (match from start to prune logic prefixes like "py_")
+                                if pattern:
+                                    sanitized_assoc = re.sub(pattern, '', sanitized_assoc)
+                        
+                        # B. Add Numbering (Chronological Prefix)
+                        file_creation_count += 1
+                        if add_numbering:
+                            # Use 3 digits, e.g., 001_file.py
+                            sanitized_assoc = f"{file_creation_count:03d}_{sanitized_assoc}"
+                        
+                        # --- End Advanced Naming Logic ---
+
                         dest_path = os.path.join(dir_files, sanitized_assoc)
                         
                         try:

@@ -32,5 +32,12 @@ ParseAI aims to evolve into a highly extensible framework where users can define
 ## 4. Metadata Extraction (Phase 4 - Planned)
 - **Goal**: defining rich metadata extraction rules (e.g. author, version, dependencies) alongside file content.
 
+## 5. Advanced Naming & Ordering (Phase 5 - Completed)
+- **Goal**: Manage large-scale outputs (1000+ files) with precise ordering and namespace control.
+- **Chronological Tracking**:
+  - **Implemented**: CLI flag `--add-numbering` / `-n` adds `001_` prefixes.
+- **Prefix Argument System**:
+  - **Implemented**: CLI flag `--strip` / `-s` accepts regex patterns to clean filenames (e.g. `-s "^py_"`).
+
 ## Contribution
 We welcome community contributions to define standard patterns for common LLM outputs (e.g. ChatGPT, Claude, standard markdown blocks).

@@ -30,6 +30,11 @@ This will:
 ./parser_ai/run_parser.sh --help
 ```
 
+**Advanced Naming Options:**
+*   `--add-numbering` / `-n`: Prepend sequential numbers (e.g. `001_script.py`) to keep files sorted chronologically.
+*   `--strip "REGEX"` / `-s "REGEX"`: Remove unwanted prefixes from filenames. Can be used multiple times.
+    *   Example: `--strip "^py_" --strip "^sh_"` transforms `py_main.py` -> `main.py`.
+
 ## Features
 
 ### 1. Conversational Parsing

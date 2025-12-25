@@ -91,4 +91,20 @@ Sometimes a model might hallucinate a header but fail to provide code, or provid
 ## 4. Tips for Success
 *   **Use Extensions**: Always ask the model to include file extensions (.py, .js, .md).
 *   **Avoid Spaces**: Filenames with spaces usually break standard regexes. Use underscores or camelCase.
-*   **Relative Paths**: Encouraging the model to output `apps/main.py` instead of just `main.py` helps keep your extracted files organized in the output directory.
+## 5. Advanced Naming & Sanitization
+
+When working with LLMs that refuse to follow naming conventions (e.g. they insist on `py_script.py` instead of just `script.py`), or when you have hundreds of files that need order, use these features.
+
+### Force Chronological Numbering
+Use `--add-numbering` (or `-n`) to force an explicit order on your files based on when they appeared in the chat.
+*   **Result**: `001_initial_thought.txt`, `002_server_v1.py`, `003_server_v2.py`.
+
+### Stripping "Helpful" Prefixes
+If your model annoyingly prefixes files with their type:
+> "Here is the python file `py_main.py` and the shell script `sh_setup.sh`"
+
+You can strip these automatically:
+```bash
+./parser_ai/run_parser.sh --strip "^py_" --strip "^sh_"
+```
+**Result**: `main.py` and `setup.sh`.
