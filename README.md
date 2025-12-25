@@ -20,7 +20,8 @@ The tool operates on a simple "Ingest → Process → Extract" pipeline:
 2. **Ingest**: Drop the JSON file into the `ingest/` folder.  
 3. **Run**: Execute the parser script.  
 4. **Result**:  
-   * **Readable Logs**: A formatted markdown file appears in `output/` (e.g., `MySession_parsed.md`).  
+   * **Readable Logs**: A formatted markdown file appears in `output/` (e.g., `MySession_parsed.md`).
+   * **System Prompt**: If present, extracted to `output/MySession_system_prompt.txt`.
    * **Source Code**: A folder appears (e.g., `output/MySession_files/`) containing every script, config, or snippet the AI generated.
 
 ## **🛠️ Installation & Setup**

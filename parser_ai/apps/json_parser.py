@@ -159,5 +159,14 @@ def main():
             
             print(f"Saved output to: {output_path}")
 
+            # 4. Extract and Save "System Instructions" (Sidecar)
+            system_instruction = data.get("systemInstruction", {}).get("text")
+            if system_instruction:
+                sys_filename = f"{safe_name}_system_prompt.txt"
+                sys_path = os.path.join(run_output_dir, sys_filename)
+                with open(sys_path, 'w', encoding='utf-8') as f:
+                    f.write(system_instruction)
+                print(f"Saved System Instructions to: {sys_path}")
+
 if __name__ == "__main__":
     main()
