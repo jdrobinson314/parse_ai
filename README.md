@@ -61,8 +61,8 @@ You can customize how files are named and organized using flags.
 | :---- | :---- | :---- | :---- |
 | `--add-numbering` | `-n` | **Chronological Sorting**. Prepends `001_`, `002_` to files. Useful for tracking code evolution. | `001_script.py`, `002_updated_script.py` |
 | `--strip` | `-s` | **Prefix Removal**. Strips specific regex patterns from filenames. Can be used multiple times. | `--strip "^py_" --strip "^sh_"` |
-| `--reconstruct` | `-r` | **Structure Recovery**. Project flat filenames into directories using underscores. | `src_main.py` -> `src/main.py` |
-| `--merge-to` | `-m` | **Consolidated Project**. Merges fragmented reconstructed files into a single unified directory. | `--merge-to ./my_app` |
+| `--reconstruct` | `-r` | **Structure Recovery (Clean)**. Projects flat filenames into directories *and* strips type prefixes (e.g. `py_`, `sh_`). | `py_core_main.py` -> `core/main.py` |
+| `--merge-to` | `-m` | **Sorted-by-Type Merge**. Consolidates files into a target folder, sorting them by type (prefix/extension). | `--merge-to ./my_app` -> `my_app/py/core/main.py` |
 | `--help` | `-h` | Show full help message. |  |
 
 **Example Command:**
