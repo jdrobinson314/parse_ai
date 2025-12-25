@@ -80,18 +80,20 @@ ParseAI uses a multi-layered heuristic engine to determine where code should go.
 
 ### **1. The "Golden Standard" (Code Fence)**
 
-The most robust method. If the language tag in the markdown code block includes a colon and a path, ParseAI uses it immediately.
+*   If a filename is in the format `folder_file.ext`, you can use `--reconstruct` to automatically build the directory structure.
 
 **Input in AI Studio:**
 
 > Here is the updated server code:
-> ```python:src/backend/server.py
+> ```python:src_backend_server.py
 > print("Starting server...")
 > ```
 
-**Output on Disk:**
+**Output on Disk (Default):**
+`output/SessionName_files/files/src_backend_server.py`
 
-`output/SessionName_files/src/backend/server.py`
+**Output on Disk (with `--reconstruct`):**
+`output/SessionName_files/reconstructed/src/backend/server.py`
 
 ### **2. Header Association**
 
