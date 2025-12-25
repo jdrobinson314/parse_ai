@@ -56,7 +56,33 @@ Displays the help menu with a list of available arguments.
 # Input: src_utils_logger.py
 # Output: reconstructed/src/utils/logger.py
 ./parser_ai/run_parser.sh --reconstruct
+./parser_ai/run_parser.sh --reconstruct
 ```
+
+### **`--merge-to` / `-m`**
+**Purpose**: Unified Project Creation.
+**Behavior**: Consolidates the fragmented, time-stamped directories created by reconstruction into a single, clean project structure (e.g. `./my_new_app`).
+**Strategy**: Uses a "Last-Write-Wins" policy. If `main.py` was created 3 times in the chat, the final project will contain the content of the 3rd version.
+
+```bash
+# Input: 
+#   - 001_src_main.py (Old)
+#   - 003_src_main.py (New)
+# Output: 
+#   - ./my_app/src/main.py (New Content)
+
+./parser_ai/run_parser.sh --reconstruct --merge-to ./my_app
+```
+
+### **Output Structures**
+*   **`files/`**: Flat list of all extracted files (best for history).
+*   **`reconstructed/`**: **Clean Project Structure**.
+    *   Strips "Type Prefixes" (e.g. `py_`, `sh_`) to reveal the intended path.
+    *   Examples: `py_core_main.py` -> `core/main.py`.
+*   **`merged_project/`**: **Sorted-by-Type Collection**.
+    *   Categorizes files by their type prefix or extension.
+    *   Examples: `py_core_main.py` -> `py/core/main.py`.
+    *   Contains the *latest version* of every file (Last-Write-Wins).
 
 ## **4. Advanced Combinations**
 
@@ -66,9 +92,12 @@ You can mix and match flags for powerful workflows.
 This command numbers every file (so no code is lost), strips the "py_" helper prefix, and reconstructs the folder structure.
 
 ```bash
-./parser_ai/run_parser.sh -n -s "^py_" -s "^sh_" -r
+```bash
+./parser_ai/run_parser.sh -n -s "^py_" -s "^sh_" -r --merge-to ./full_project
 ```
 
 **Result:**
+**Result:**
 *   `files/001_main.py`
 *   `reconstructed/001_src/backend/main.py`
+*   `merged_project/src/backend/main.py` (Created by `--clean-project`)

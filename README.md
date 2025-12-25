@@ -62,6 +62,7 @@ You can customize how files are named and organized using flags.
 | `--add-numbering` | `-n` | **Chronological Sorting**. Prepends `001_`, `002_` to files. Useful for tracking code evolution. | `001_script.py`, `002_updated_script.py` |
 | `--strip` | `-s` | **Prefix Removal**. Strips specific regex patterns from filenames. Can be used multiple times. | `--strip "^py_" --strip "^sh_"` |
 | `--reconstruct` | `-r` | **Structure Recovery**. Project flat filenames into directories using underscores. | `src_main.py` -> `src/main.py` |
+| `--merge-to` | `-m` | **Consolidated Project**. Merges fragmented reconstructed files into a single unified directory. | `--merge-to ./my_app` |
 | `--help` | `-h` | Show full help message. |  |
 
 **Example Command:**
@@ -71,7 +72,11 @@ You can customize how files are named and organized using flags.
 ./parser_ai/run_parser.sh -n --strip "^temp_"
 
 # Reconstruct directory structure from underscores
+# Reconstruct directory structure from underscores
 ./parser_ai/run_parser.sh --reconstruct
+
+# Reconstruct and MERGE into a clean project structure (recommended)
+./parser_ai/run_parser.sh --reconstruct --merge-to ./final_project
 ```
 
 ## **🧠 Intelligent Code Extraction**

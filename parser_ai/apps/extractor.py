@@ -129,6 +129,7 @@ class CodeExtractor:
             current_filename = None
             processed_filenames = set()
             file_versions = {} # Track version count for each file
+            reconstructed_versions = {} # Track version count for reconstructed files
             
             # File creation counter for numbering feature
             file_creation_count = 0 
@@ -217,33 +218,67 @@ class CodeExtractor:
 
                         # --- PATH 2: RECONSTRUCTED (Optional) ---
                         if reconstruct:
-                            # Logic: Reconstruct directory structure from underscores
-                            # 1. Split filename (minus extension)
-                            base, ext = os.path.splitext(base_sanitized)
+                            # 1. Identify and Strip Type Prefix for CLEAN Reconstruction
+                            clean_base = base_sanitized
+                            type_prefix = None
                             
-                            reconstructed_rel_path = base_sanitized # Default fallback
+                            # Common prefixes to strip for "Project Structure", but keep for "Sorted Merge"
+                            # e.g. py, sh, txt, json, cfg, js, html, css, md
+                            known_prefixes = ['py', 'sh', 'txt', 'json', 'cfg', 'js', 'html', 'css', 'md', 'src', 'test', 'config']
+                            
+                            for p in known_prefixes:
+                                if clean_base.lower().startswith(f"{p}_"):
+                                    type_prefix = p
+                                    # Strip it for reconstruction
+                                    clean_base = clean_base[len(p)+1:] 
+                                    break
+                            
+                            # 2. Logic: Reconstruct directory structure from underscores (using CLEAN base)
+                            base, ext = os.path.splitext(clean_base)
+                            
+                            reconstructed_rel_path = clean_base # Default fallback
                             
                             if '_' in base:
                                 parts = base.split('_')
-                                parts[-1] += ext
-                                reconstructed_rel_path = os.path.join(*parts)
+                                # Conservative Reconstruction:
+                                # "core_span_classifier" -> "core/span_classifier.py"
+                                
+                                if len(parts) > 1:
+                                    last = parts.pop()
+                                    second_last = parts.pop()
+                                    leaf_name = f"{second_last}_{last}"
+                                    leaf_filename = leaf_name + ext
+                                    
+                                    if parts:
+                                        reconstructed_rel_path = os.path.join(*parts, leaf_filename)
+                                    else:
+                                        reconstructed_rel_path = leaf_filename
+                                else:
+                                    reconstructed_rel_path = clean_base
                             
-                            # Apply Numbering to the ROOT
-                            # If numbering is on: 001_src/backend/main.py
+                            # Apply Numbering to the ROOT of reconstructed path
                             final_reconstructed_name = f"{num_prefix}{reconstructed_rel_path}"
-                            
                             dest_path_reconstructed = os.path.join(dir_reconstructed, final_reconstructed_name)
                             
-                            # We track versions separately for reconstructed? 
-                            # Or just overwrite? 
-                            # Let's share the versioning logic but usually reconstruction implies structure is unique.
-                            # However, to be safe, we use the same safe save.
-                            self._save_content_safely(dest_path_reconstructed, content, {}) # Use fresh version dict or shared?
-                            # Using empty dict means it won't rotate based on previous FLAT versions, which is correct.
-                            # It will rotate if ITSELF clashes.
+                            self._save_content_safely(dest_path_reconstructed, content, reconstructed_versions)
                             
                             entry["reconstructed_path"] = final_reconstructed_name
-
+                            
+                            # 3. Calculate Sorted Path for Merge (Prefix/CleanPath)
+                            if type_prefix:
+                                # If we stripped a prefix, use it as the sorting folder
+                                entry["sorted_path"] = os.path.join(type_prefix, reconstructed_rel_path)
+                            else:
+                                # If no prefix, maybe sort by extension? OR just use root.
+                                # User said "sorted-by-type".
+                                # If file is "main.py", explicit type is better?
+                                # Let's try to infer from extension if no prefix found?
+                                inferred_type = lang if lang else "misc"
+                                # Check extension if lang is generic
+                                if not lang and ext:
+                                    inferred_type = ext.lstrip('.')
+                                
+                                entry["sorted_path"] = os.path.join(inferred_type, reconstructed_rel_path)
 
                         # Consume the header context since we've processed a block
                         current_filename = None 
@@ -358,6 +393,17 @@ class CodeExtractor:
         try:
             # Check if file exists
             if os.path.exists(dest_path):
+                # Check for Identical Content to prevent spam
+                try:
+                    with open(dest_path, 'r', encoding='utf-8') as current_f:
+                        existing_content = current_f.read()
+                    if existing_content == content:
+                        print(f"Skipping identical file: {dest_path}")
+                        return
+                except Exception:
+                    # If read fails, proceed to rotate just in case
+                    pass
+
                 # Rotate!
                 # We use the full path as key to avoid collisions between files/foo.py and reconstructed/foo.py if they share a dict
                 key = dest_path 
@@ -382,3 +428,72 @@ class CodeExtractor:
         except Exception as e:
             print(f"Failed to populate {dest_path}: {e}")
 
+
+    def merge_reconstruction(self, manifest_path, merge_target, clean_target=False):
+        """
+        Consolidates textually reconstructed files into a single unified directory.
+        Last-write-wins strategy based on manifest order.
+        
+        :param clean_target: If True, deletes the merge_target directory before merging.
+        """
+        import json
+        import shutil
+
+        if not os.path.exists(manifest_path):
+            print(f"Merge skipped: Manifest not found at {manifest_path}")
+            return
+
+        with open(manifest_path, 'r') as f:
+            manifest = json.load(f)
+
+        if clean_target and os.path.exists(merge_target):
+            print(f"Cleaning merge target: {merge_target}")
+            shutil.rmtree(merge_target)
+
+        if not os.path.exists(merge_target):
+            os.makedirs(merge_target)
+            print(f"Created merge target directory: {merge_target}")
+
+        count = 0
+        
+        # Determine the base directory of the current extraction to resolve relative paths
+        base_extraction_dir = os.path.dirname(manifest_path)
+        reconstructed_dir = os.path.join(base_extraction_dir, "reconstructed")
+
+        print(f"Merging reconstruction into: {merge_target}")
+
+        for entry in manifest:
+            if "reconstructed_path" in entry:
+                # 1. Get the source path (from reconstructed directory)
+                rel_path = entry["reconstructed_path"]
+                src_path = os.path.join(reconstructed_dir, rel_path)
+
+                if os.path.exists(src_path):
+                    # 2. Determine destination path
+                    # User Request: Merged folder should house "sorted-by-type" folders.
+                    # We prioritize 'sorted_path' from manifest.
+                    
+                    if "sorted_path" in entry:
+                         dest_rel_path = entry["sorted_path"]
+                    else:
+                         # Fallback: Strip numbering from reconstructed path
+                         # Regex to remove leading digits and underscore from first component?
+                         # Or just use the reconstructed path as is (flattened slightly)
+                         dest_rel_path = rel_path
+                         parts = dest_rel_path.split(os.sep)
+                         if len(parts) > 0:
+                             parts[0] = re.sub(r'^\d{3}_', '', parts[0])
+                         dest_rel_path = os.path.join(*parts)
+
+                    dest_path = os.path.join(merge_target, dest_rel_path)
+                    
+                    # 3. Copy (Overwrite)
+                    dest_dir = os.path.dirname(dest_path)
+                    if not os.path.exists(dest_dir):
+                        os.makedirs(dest_dir)
+                        
+                    shutil.copy2(src_path, dest_path)
+                    count += 1
+ 
+
+        print(f"  -> Merged {count} files to {merge_target}")

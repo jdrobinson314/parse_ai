@@ -1,0 +1,1 @@
+print("Should be merged/python/plain_script.py")
