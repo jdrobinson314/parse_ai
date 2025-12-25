@@ -83,11 +83,12 @@ ParseAI uses a multi-layered heuristic engine to determine where code should go.
 *   If a filename is in the format `folder_file.ext`, you can use `--reconstruct` to automatically build the directory structure.
 
 **Input in AI Studio:**
-
+```text
 > Here is the updated server code:
-> \`\`\`python:src_backend_server.py
+> ```python:src_backend_server.py
 > print("Starting server...")
-> \`\`\`
+> ```
+```
 
 **Output on Disk (Default):**
 `output/SessionName_files/files/src_backend_server.py`
