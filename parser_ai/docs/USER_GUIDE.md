@@ -75,14 +75,13 @@ Displays the help menu with a list of available arguments.
 ```
 
 ### **Output Structures**
-*   **`files/`**: Flat list of all extracted files (best for history).
-*   **`reconstructed/`**: **Clean Project Structure**.
-    *   Strips "Type Prefixes" (e.g. `py_`, `sh_`) to reveal the intended path.
-    *   Examples: `py_core_main.py` -> `core/main.py`.
-*   **`merged_project/`**: **Sorted-by-Type Collection**.
-    *   Categorizes files by their type prefix or extension.
-    *   Examples: `py_core_main.py` -> `py/core/main.py`.
-    *   Contains the *latest version* of every file (Last-Write-Wins).
+*   **`files/`**: **Flattened History**. Checks explicit paths (`src/utils.py`) and converts them to safe filenames (`src_utils.py`) to keep a flat list.
+*   **`reconstructed/`**: **Path-Aware Structure**.
+    *   Respects explicit paths defined in code fences (e.g., `src/core/main.py`).
+    *   Creates the necessary directory tree automatically.
+*   **`merged_project/`**: **Final Project**.
+    *   Consolidated view of the `reconstructed/` folder.
+    *   Contains the *latest version* of every file.
 
 ## **4. Advanced Combinations**
 

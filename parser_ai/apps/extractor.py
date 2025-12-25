@@ -191,14 +191,19 @@ class CodeExtractor:
                         entry["associated_filename"] = target_filename
                         
                         # --- COMMON PRE-PROCESSING ---
-                        # Base sanitization
-                        base_sanitized = self.sanitize_filename(os.path.basename(target_filename))
+                        # Sanitize, but KEEP the path structure for reconstruction
+                        # We only basename it for the "Files" (flat) view initially
                         
-                        # A. Strip Prefixes (String/Regex) - Applies to ALL potential outputs
+                        # 1. Flattened Name for 'files/' directory
+                        # Replace separators with underscores to flatten
+                        flat_sanitized = target_filename.replace('/', '_').replace('\\', '_')
+                        flat_sanitized = self.sanitize_filename(flat_sanitized) # Strict sanitization (no slashes)
+                        
+                        # A. Strip Prefixes (String/Regex) - Applies to FLAT files if requested
                         if strip_patterns:
                             for pattern in strip_patterns:
                                 if pattern:
-                                    base_sanitized = re.sub(pattern, '', base_sanitized)
+                                    flat_sanitized = re.sub(pattern, '', flat_sanitized)
                         
                         file_creation_count += 1
                         
@@ -209,76 +214,44 @@ class CodeExtractor:
 
 
                         # --- PATH 1: FLAT FILES (Default) ---
-                        # Logic: Numbering + Stripped Name
-                        flat_name = f"{num_prefix}{base_sanitized}"
+                        # Logic: Numbering + Flat Name
+                        flat_name = f"{num_prefix}{flat_sanitized}"
                         dest_path_flat = os.path.join(dir_files, flat_name)
                         
                         self._save_content_safely(dest_path_flat, content, file_versions)
                         entry["saved_as"] = flat_name
 
-                        # --- PATH 2: RECONSTRUCTED (Optional) ---
+                        # --- PATH 2: RECONSTRUCTED (Explicit Path Structure) ---
                         if reconstruct:
-                            # 1. Identify and Strip Type Prefix for CLEAN Reconstruction
-                            clean_base = base_sanitized
-                            type_prefix = None
+                            # User Protocol: "code blocks must indicate the full relative path"
+                            # We trust the target_filename includes the structure (e.g. src/utils.py)
                             
-                            # Common prefixes to strip for "Project Structure", but keep for "Sorted Merge"
-                            # e.g. py, sh, txt, json, cfg, js, html, css, md
-                            known_prefixes = ['py', 'sh', 'txt', 'json', 'cfg', 'js', 'html', 'css', 'md', 'src', 'test', 'config']
+                            # Sanitize the full path (allowing slashes)
+                            # We construct a safe relative path
+                            clean_rel_path = self.sanitize_path(target_filename)
                             
-                            for p in known_prefixes:
-                                if clean_base.lower().startswith(f"{p}_"):
-                                    type_prefix = p
-                                    # Strip it for reconstruction
-                                    clean_base = clean_base[len(p)+1:] 
-                                    break
+                            # Apply Numbering to the ROOT? 
+                            # If numbering is on, we prefix the ROOT component.
+                            # e.g. 001_src/utils.py
                             
-                            # 2. Logic: Reconstruct directory structure from underscores (using CLEAN base)
-                            base, ext = os.path.splitext(clean_base)
-                            
-                            reconstructed_rel_path = clean_base # Default fallback
-                            
-                            if '_' in base:
-                                parts = base.split('_')
-                                # Conservative Reconstruction:
-                                # "core_span_classifier" -> "core/span_classifier.py"
-                                
-                                if len(parts) > 1:
-                                    last = parts.pop()
-                                    second_last = parts.pop()
-                                    leaf_name = f"{second_last}_{last}"
-                                    leaf_filename = leaf_name + ext
-                                    
-                                    if parts:
-                                        reconstructed_rel_path = os.path.join(*parts, leaf_filename)
-                                    else:
-                                        reconstructed_rel_path = leaf_filename
-                                else:
-                                    reconstructed_rel_path = clean_base
-                            
-                            # Apply Numbering to the ROOT of reconstructed path
-                            final_reconstructed_name = f"{num_prefix}{reconstructed_rel_path}"
+                            if add_numbering:
+                                # Inject prefix into the first directory component
+                                parts = clean_rel_path.split(os.sep)
+                                parts[0] = f"{num_prefix}{parts[0]}"
+                                final_reconstructed_name = os.path.join(*parts)
+                            else:
+                                final_reconstructed_name = clean_rel_path
+
                             dest_path_reconstructed = os.path.join(dir_reconstructed, final_reconstructed_name)
                             
+                            # Save with versioning logic (though with explicit paths, versions likely in header/header-v2)
                             self._save_content_safely(dest_path_reconstructed, content, reconstructed_versions)
                             
                             entry["reconstructed_path"] = final_reconstructed_name
                             
-                            # 3. Calculate Sorted Path for Merge (Prefix/CleanPath)
-                            if type_prefix:
-                                # If we stripped a prefix, use it as the sorting folder
-                                entry["sorted_path"] = os.path.join(type_prefix, reconstructed_rel_path)
-                            else:
-                                # If no prefix, maybe sort by extension? OR just use root.
-                                # User said "sorted-by-type".
-                                # If file is "main.py", explicit type is better?
-                                # Let's try to infer from extension if no prefix found?
-                                inferred_type = lang if lang else "misc"
-                                # Check extension if lang is generic
-                                if not lang and ext:
-                                    inferred_type = ext.lstrip('.')
-                                
-                                entry["sorted_path"] = os.path.join(inferred_type, reconstructed_rel_path)
+                            # For Merging, we typically just want the CLEAN path (no numbering)
+                            # Since the explicit path IS the sorted path (src/foo.py), we use it directly.
+                            entry["sorted_path"] = clean_rel_path
 
                         # Consume the header context since we've processed a block
                         current_filename = None 
@@ -332,7 +305,7 @@ class CodeExtractor:
         if filename.startswith('_'): return False
         
         # 3. Stopwords
-        stopwords = {'directory', 'folder', 'file', 'code', 'here', 'script', 'example'}
+        stopwords = {'directory', 'folder', 'file', 'code', 'here', 'script', 'example', 'bash', 'python', 'json'}
         if filename.lower() in stopwords: return False
         
         # 4. Extension Requirement
@@ -350,20 +323,37 @@ class CodeExtractor:
 
     def sanitize_filename(self, filename):
         """
-        Sanitizes the filename by removing invalid characters.
+        Strict sanitization: Removes ALL path separators. Used for 'flat' filenames.
         """
-        # Remove invalid characters
+        # Remove invalid characters including slashes
         filename = re.sub(r'[<>:"/\\|?*]', '', filename)
         # Collapse whitespace
         filename = re.sub(r'\s+', '_', filename)
         return filename.strip()
+
+    def sanitize_path(self, path):
+        """
+        Path sanitization: Allows slashes but removes other dangerous chars.
+        Used for 'reconstructed' paths.
+        """
+        # Collapse whitespace
+        path = re.sub(r'\s+', '_', path)
+        # Remove invalid characters EXCEPT / and \
+        # regex for [<>:"|?*]
+        path = re.sub(r'[<>:"|?*]', '', path)
+        # Normalize slashes to OS separator?
+        path = os.path.normpath(path)
+        # Remove leading slashes to ensure it's relative
+        while path.startswith(os.sep):
+            path = path[1:]
+        return path.strip()
 
 
     def _write_file(self, directory, filename, content, language):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # Sanitize filename
+        # Sanitize filename (STRICT for blocks, they are just numbered items)
         filename = self.sanitize_filename(os.path.basename(filename))
         
         # Infer extension if missing
