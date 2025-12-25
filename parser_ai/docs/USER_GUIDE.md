@@ -83,7 +83,31 @@ Displays the help menu with a list of available arguments.
     *   Consolidated view of the `reconstructed/` folder.
     *   Contains the *latest version* of every file.
 
-## **4. Advanced Combinations**
+## **4. Advanced Custom Parsing (`--parse`)**
+
+ParseAI allows you to inject custom parsing logic directly from the command line using the `--parse` argument. This is powerful when you are dealing with log files or chat exports that use different conventions for naming files.
+
+**How it Works**: The parser accepts a Python Regular Expression. **Crucially, you must use a capture group `(...)` to indicate which part of the pattern is the filename.**
+
+### Examples
+
+**Scenario A: The "Save As" Pattern**
+> Start of File: `Save this code as: server.js`
+*   **Regex**: `Save this code as:\s*(.+)`
+*   **Command**:
+    ```bash
+    ./parser_ai/run_parser.sh --parse "Save this code as:\s*(.+)"
+    ```
+
+**Scenario B: The Bracket Style**
+> Start of File: `[FILE] /src/components/Button.tsx`
+*   **Regex**: `\[FILE\]\s+(.+)`
+*   **Command**:
+    ```bash
+    ./parser_ai/run_parser.sh --parse "\[FILE\]\s+(.+)"
+    ```
+
+## **5. Advanced Combinations**
 
 You can mix and match flags for powerful workflows.
 
@@ -91,12 +115,10 @@ You can mix and match flags for powerful workflows.
 This command numbers every file (so no code is lost), strips the "py_" helper prefix, and reconstructs the folder structure.
 
 ```bash
-```bash
 ./parser_ai/run_parser.sh -n -s "^py_" -s "^sh_" -r --merge-to ./full_project
 ```
 
 **Result:**
-**Result:**
 *   `files/001_main.py`
 *   `reconstructed/001_src/backend/main.py`
-*   `merged_project/src/backend/main.py` (Created by `--clean-project`)
+*   `merged_project/src/backend/main.py` (Created by `--merge-to`)

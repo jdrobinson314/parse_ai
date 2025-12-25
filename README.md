@@ -138,8 +138,7 @@ Sometimes the AI puts the filename in its own tiny code block before the actual 
 ## **📚 Documentation & Resources**
 
 * [**Plugin Roadmap**](parser_ai/docs/PLUGIN_ROADMAP.md): Plans for supporting other LLM export formats.  
-* [**Prompting Guide**](parser_ai/docs/REGEX_AND_PROMPTING_GUIDE.md): **Crucial Reading.** Learn how to prompt Google AI Studio to output code in the format ParseAI likes best (System Prompts included).
-* [**System Prompts & Naming**](HOWTO_PROMPTING_AND_NAMING.md): Detailed guide on how strict system prompts work with ParseAI's automatic renaming and versioning features.
+* [**Prompting & Naming Guide**](parser_ai/docs/PROMPTING_AND_NAMING_GUIDE.md): **Crucial Reading.** The official protocol for "God Mode" system prompts to ensure perfect project generation.
 * [**User Guide**](parser_ai/docs/USER_GUIDE.md): Complete instructions on installation, usage, and command-line arguments.
 * [**Source Code Reference**](parser_ai/docs/SOURCE_CODE_REFERENCE.md): A technical look at the internal logic of ParseAI's modules.
 
