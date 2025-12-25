@@ -72,7 +72,6 @@ You can customize how files are named and organized using flags.
 ./parser_ai/run_parser.sh -n --strip "^temp_"
 
 # Reconstruct directory structure from underscores
-# Reconstruct directory structure from underscores
 ./parser_ai/run_parser.sh --reconstruct
 
 # Reconstruct and MERGE into a clean project structure (recommended)
