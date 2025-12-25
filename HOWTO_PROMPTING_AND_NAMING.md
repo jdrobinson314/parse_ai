@@ -101,3 +101,32 @@ If you want to keep *history* of how the file changed over a long conversation, 
 This gives you the best of both worlds:
 1.  **AI Consistency**: The AI sees stable filenames (`import core_main`), so it doesn't get confused.
 2.  **User Control**: You get clean filenames or chronological version strings on your hard drive.
+### **C. Clean Project Reconstruction (`--clean-project`)**
+
+The most powerful way to use ParseAI is to allow it to build your folder structure for you. The parser now has intelligent logic to **strip type prefixes** when rebuilding the project tree.
+
+**The Strategy:**
+Prompt the AI to use "snake_case" filenames that represent the path, starting with a type prefix (`py_`, `sh_`, `json_`).
+
+**How to Prompt:**
+> "Name your files with a type prefix and snake_case path. For example, `py_core_utils.py` will become `core/utils.py`."
+
+**The Result:**
+When you run:
+```bash
+./parser_ai/run_parser.sh --clean-project
+```
+
+ParseAI performs **"Clean Reconstruction"**:
+1.  **Detects Prefix**: Sees `py_core_utils.py`. Recognizes `py_` is a helper prefix.
+2.  **Strips Prefix**: Removes `py_`. Remaining: `core_utils.py`.
+3.  **Reconstructs Path**: Splits by underscores. `core_utils.py` -> `core/utils.py`.
+
+| AI Output Name | Final Clean Path |
+| :--- | :--- |
+| `py_main.py` | `main.py` |
+| `py_core_server.py` | `core/server.py` |
+| `sh_scripts_deploy.sh` | `scripts/deploy.sh` |
+| `json_config_app_settings.json` | `config/app/settings.json` |
+
+This allows you to keep a flat, easily referencable list of files in the chat ("Check `py_core_server.py`"), while generating a perfectly deep-nested project structure on disk.
