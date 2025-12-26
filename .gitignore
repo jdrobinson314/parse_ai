@@ -35,3 +35,4 @@ output/*
 parser_ai/apps/test_output*
 
 *.DS_Store
+ParseAi.code-workspace
