@@ -11,10 +11,17 @@ This guide provides a comprehensive overview of how to use ParseAI to turn your 
 
 ## **2. Basic Usage**
 
-The simplest way to run ParseAI is with default settings. This will parse all JSON files in `ingest/` and extract code blocks into a flat structure.
+The simplest way to run ParseAI is with default settings. This will parse all `.json` files in `ingest/`.
+- Converts chat logs to **Markdown**, **HTML**, and **PDF**.
+- Extracts code blocks into a structured folder system.
+- Recursively processes any Markdown files extracted from the chat.
 
 ```bash
+# Linux / MacOS
 ./parser_ai/run_parser.sh
+
+# Windows
+.\parser_ai\run_parser.ps1
 ```
 
 ## **3. Command Line Arguments**
@@ -81,7 +88,33 @@ Displays the help menu with a list of available arguments.
     *   Creates the necessary directory tree automatically.
 *   **`merged_project/`**: **Final Project**.
     *   Consolidated view of the `reconstructed/` folder.
+    *   Consolidated view of the `reconstructed/` folder.
     *   Contains the *latest version* of every file.
+
+### **`--clean-project` / `-cp`**
+**Purpose**: One-Shot Project Build.
+**Behavior**: Shortcut for `-r` and `-m`. Immediately reconstructs files and merges them into a `merged_project/` folder inside the `_files` output directory. 
+
+### **`--page-size`**
+**Purpose**: Output Formatting.
+**Behavior**: Sets the page size for the generated PDF documentation.
+**Default**: `Letter`
+**Values**: `A4`, `Legal`, `Letter`, etc.
+
+```bash
+./parser_ai/run_parser.sh --page-size A4
+```
+
+### **`--header-border-char`**
+**Purpose**: Metadata Parsing.
+**Behavior**: Defines the character used to identify the "Header Block" within extracted Markdown files.
+**Default**: `-`
+**Mechanism**: If a file starts with lines of text followed by a separator line (e.g., `-------`), the parser treats the top section as Metadata and styles it into a code block in the HTML/PDF.
+
+```bash
+# Parses headers ending with "======="
+./parser_ai/run_parser.sh --header-border-char "="
+```
 
 ## **4. Advanced Custom Parsing (`--parse`)**
 
@@ -107,7 +140,17 @@ ParseAI allows you to inject custom parsing logic directly from the command line
     ./parser_ai/run_parser.sh --parse "\[FILE\]\s+(.+)"
     ```
 
-## **5. Advanced Combinations**
+    ./parser_ai/run_parser.sh --parse "\[FILE\]\s+(.+)"
+    ```
+
+## **5. Recursive Processing**
+
+If your chat log contains **Markdown files** (e.g., the AI generates a `README.md` or `design_doc.md`), ParseAI recursively treats them as mini-projects:
+1.  **Documentation**: It automatically generates an HTML and PDF version of that extracted file.
+2.  **Nested Extraction**: It scans the extracted markdown file for *more* code blocks or file definitions.
+    *   If `doc.md` contains a Python script, that script will be extracted to `doc_files/files/script.py`.
+
+## **6. Advanced Combinations**
 
 You can mix and match flags for powerful workflows.
 

@@ -3,6 +3,8 @@ import os
 import sys
 import re
 import argparse
+from html_generator import generate_html
+from pdf_generator import generate_pdf
 
 # Configuration
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -85,6 +87,7 @@ def main():
     parser = argparse.ArgumentParser(description="Parse JSON conversation logs to Markdown.")
     parser.add_argument("--input", "-i", default=DEFAULT_INGEST_DIR, help="Directory containing JSON files")
     parser.add_argument("--output", "-o", default=DEFAULT_OUTPUT_DIR, help="Directory to save output Markdown files")
+    parser.add_argument("--page-size", default="Letter", help="Page size for PDF output (e.g., Letter, A4)")
     
     # We use parse_known_args because run_parser.sh passes "$@" which might contain other args (though currently it doesn't)
     args, unknown = parser.parse_known_args()
@@ -101,6 +104,20 @@ def main():
         return
 
     all_files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f)) and not f.startswith('.')]
+    
+    # Auto-rename hook: Ensure all files have .json extension if they lack one
+    for i, f in enumerate(all_files):
+        path = os.path.join(input_dir, f)
+        if '.' not in f:
+            new_name = f"{f}.json"
+            new_path = os.path.join(input_dir, new_name)
+            try:
+                os.rename(path, new_path)
+                print(f"Auto-renamed '{f}' to '{new_name}'")
+                all_files[i] = new_name # Update list for processing
+            except Exception as e:
+                print(f"Failed to auto-rename '{f}': {e}")
+                
     json_files = []
 
     for f in all_files:
@@ -135,6 +152,14 @@ def main():
         file_path = os.path.join(input_dir, filename)
         print(f"Processing: {filename}")
         
+        # Load data first
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"Failed to load {filename}: {e}")
+            continue
+
         extracted_text = parse_file(file_path)
         
         if extracted_text:
@@ -146,6 +171,8 @@ def main():
             safe_name = re.sub(r'\s+', '_', safe_name).strip()
             
             output_filename = f"{safe_name}.md"
+            html_filename = f"{safe_name}.html"
+            pdf_filename = f"{safe_name}.pdf"
             
             # Create a dedicated directory for this run
             run_output_dir = os.path.join(output_dir, safe_name)
@@ -167,6 +194,15 @@ def main():
                 with open(sys_path, 'w', encoding='utf-8') as f:
                     f.write(system_instruction)
                 print(f"Saved System Instructions to: {sys_path}")
+
+            # 5. Generate HTML
+            html_path = os.path.join(run_output_dir, html_filename)
+            
+            if generate_html(data, html_path):
+                # 6. Generate PDF (dependent on HTML usually, or raw data)
+                # Our pdf_generator takes html path
+                pdf_path = os.path.join(run_output_dir, pdf_filename)
+                generate_pdf(html_path, pdf_path, page_size=args.page_size)
 
 if __name__ == "__main__":
     main()

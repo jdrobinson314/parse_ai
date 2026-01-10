@@ -39,7 +39,9 @@ git clone https://github.com/jdrobinson314/parse_ai.git
 cd parse_ai
 
 # 2. Ensure execution permissions (Linux/Mac)
+# 2. Ensure execution permissions (Linux/Mac)
 chmod +x parser_ai/run_parser.sh
+# (Windows users can skip this step and use run_parser.ps1)
 ```
 
 ## **💻 Usage**
@@ -49,7 +51,11 @@ chmod +x parser_ai/run_parser.sh
 The included launcher script handles path discovery and execution.
 
 ```bash
+# Linux / MacOS
 ./parser_ai/run_parser.sh
+
+# Windows
+.\parser_ai\run_parser.ps1
 ```
 
 *This processes every JSON file found in `ingest/` and saves results to `output/`.*
