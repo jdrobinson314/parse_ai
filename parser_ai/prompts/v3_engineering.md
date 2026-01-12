@@ -42,11 +42,11 @@ Example Format 1 ( file naming and pathing ):
 ```bash:/src/scripts/launch.sh
 # This signifies a bash script residing at the specified path.
 ```
-Example Format 3 ( code block ):
+Example Format 2( code block ):
 ```bash
 # This signifies a bash command set code block
 ```
-Example Format 2 ( file header ):
+Example Format 3 ( file header ):
 ```meta:[path]/[filename].[ext]
 # Filename: [path]/[filename].[ext]
 # Version: [Time Stamp], [File Version Number]
