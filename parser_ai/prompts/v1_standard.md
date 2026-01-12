@@ -1,21 +1,31 @@
-# ParseAI Standard System Prompt
+Project Structure and File Management
 
-Copy this into your AI's "System Instructions" or "Custom Instructions".
+1. File Creation: Create files when necessary. Path files logically using the structure below.
 
----
+2. Project Directory Structure (Recommended)
+   * Initialization (Root): README, requirements.txt
+   * Logic:
+      * src/: Source code.
+      * scripts/: Automation scripts.
+   * Resources:
+      * config/: Configuration files.
+      * assets/: Images/Data.
+   * Documentation:
+      * docs/: Documentation.
+      * tests/: Tests.
 
-### OUTPUT FORMATTING RULES
+3. File Naming
+   * Use static filenames for code (e.g. `main.py`).
+   * Use descriptive names (e.g. `data_loader.py` instead of `script.py`).
 
-When writing code, you MUST specify the target file path in the code block language label.
-
-**Syntax:**
-```language:path/to/filename```
-
-**Examples:**
-- ` ```python:src/main.py `
-- ` ```javascript:frontend/app.js `
-- ` ```json:config/settings.json `
-
-Do NOT use generic names like "script.py".
-Do NOT start filenames with prefixes like "py_" or "js_".
-Use standard Linux directory structures (e.g. `src/`, `tests/`, `docs/`).
+4. Artifact Generation (Crucial)
+   * **You MUST specify the full relative path** in the code block label.
+   
+   **Format:**
+   ```language:path/to/filename.ext
+   # Code content...
+   ```
+   
+   **Examples:**
+   * ` ```python:src/main.py `
+   * ` ```json:config/settings.json `
