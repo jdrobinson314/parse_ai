@@ -149,8 +149,10 @@ Sometimes the AI puts the filename in its own tiny code block before the actual 
 
 * [**Plugin Roadmap**](parser_ai/docs/PLUGIN_ROADMAP.md): Plans for supporting other LLM export formats.  
 * [**Prompting & Naming Guide**](parser_ai/docs/PROMPTING_AND_NAMING_GUIDE.md): **Crucial Reading.** The official protocol for "God Mode" system prompts to ensure perfect project generation.
-* [**User Guide**](parser_ai/docs/USER_GUIDE.md): Complete instructions on installation, usage, and command-line arguments.
-* [**Source Code Reference**](parser_ai/docs/SOURCE_CODE_REFERENCE.md): A technical look at the internal logic of ParseAI's modules.
+*   [**User Guide**](parser_ai/docs/USER_GUIDE.md): Complete instructions on installation, usage, and command-line arguments.
+*   [**How to Rebuild Projects**](parser_ai/docs/HOW_TO_REBUILD_PROJECTS.md): A guide on using ParseAI as a filesystem compiler.
+*   [**Example Prompts**](parser_ai/prompts/): System prompts (`v1`, `v2`) to configure your LLM for ParseAI.
+*   [**Source Code Reference**](parser_ai/docs/SOURCE_CODE_REFERENCE.md): A technical look at the internal logic of ParseAI's modules.
 
 ## **License**
 
