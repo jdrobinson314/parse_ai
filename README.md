@@ -89,8 +89,6 @@ You can customize how files are named and organized using flags.
 
 ParseAI uses a multi-layered heuristic engine to determine where code should go. It scans your AI conversation for specific cues.
 
-### **1. The "Golden Standard" (Code Fence)**
-
 ### **1. The "Golden Standard" (Explicit Paths)**
 
 *   If a filename in the code fence includes a path (e.g. `src/server.py`), use `--reconstruct` to automatically build that directory structure.
@@ -135,10 +133,14 @@ Sometimes the AI puts the filename in its own tiny code block before the actual 
 ├── ingest/                  # DROP ZONE: Place Google AI Studio JSON exports here
 ├── parser_ai/               # Core Application Code
 │   ├── apps/
-│   │   ├── json_parser.py   # Log processing logic
-│   │   └── extractor.py     # Regex & file saving logic
+│   │   ├── json_parser.py   # Log Processor: JSON -> MD/HTML/PDF
+│   │   ├── extractor.py     # Core Regex Engine & File Saver
+│   │   ├── markdown_extractor.py # Recursive Extractor CLI
+│   │   ├── html_generator.py # HTML Document Builder
+│   │   └── pdf_generator.py  # PDF Renderer (xhtml2pdf)
 │   ├── docs/                # Extended Documentation
-│   └── run_parser.sh        # Entry point script
+│   ├── run_parser.sh        # Linux/Mac Launcher
+│   └── run_parser.ps1       # Windows Launcher
 ├── output/                  # ARTIFACTS: Generated logs and extracted code
 └── README.md
 ```
