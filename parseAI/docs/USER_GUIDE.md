@@ -18,10 +18,10 @@ The simplest way to run ParseAI is with default settings. This will parse all `.
 
 ```bash
 # Linux / MacOS
-./parser_ai/run_parser.sh
+./parseAI/run_parser.sh
 
 # Windows
-.\parser_ai\run_parser.ps1
+.\parseAI\run_parser.ps1
 ```
 
 ## **3. Command Line Arguments**
@@ -38,7 +38,7 @@ Displays the help menu with a list of available arguments.
 
 ```bash
 # Result: 001_script.py, 002_script.py
-./parser_ai/run_parser.sh -n
+./parseAI/run_parser.sh -n
 ```
 
 ### **`--strip` / `-s`**
@@ -48,7 +48,7 @@ Displays the help menu with a list of available arguments.
 
 ```bash
 # Input: py_main.py -> Output: main.py
-./parser_ai/run_parser.sh --strip "^py_"
+./parseAI/run_parser.sh --strip "^py_"
 ```
 
 ### **`--reconstruct` / `-r`**
@@ -62,8 +62,8 @@ Displays the help menu with a list of available arguments.
 ```bash
 # Input: src_utils_logger.py
 # Output: reconstructed/src/utils/logger.py
-./parser_ai/run_parser.sh --reconstruct
-./parser_ai/run_parser.sh --reconstruct
+./parseAI/run_parser.sh --reconstruct
+./parseAI/run_parser.sh --reconstruct
 ```
 
 ### **`--merge-to` / `-m`**
@@ -78,7 +78,7 @@ Displays the help menu with a list of available arguments.
 # Output: 
 #   - ./my_app/src/main.py (New Content)
 
-./parser_ai/run_parser.sh --reconstruct --merge-to ./my_app
+./parseAI/run_parser.sh --reconstruct --merge-to ./my_app
 ```
 
 ### **Output Structures**
@@ -102,7 +102,7 @@ Displays the help menu with a list of available arguments.
 **Values**: `A4`, `Legal`, `Letter`, etc.
 
 ```bash
-./parser_ai/run_parser.sh --page-size A4
+./parseAI/run_parser.sh --page-size A4
 ```
 
 ### **`--header-border-char`**
@@ -113,7 +113,7 @@ Displays the help menu with a list of available arguments.
 
 ```bash
 # Parses headers ending with "======="
-./parser_ai/run_parser.sh --header-border-char "="
+./parseAI/run_parser.sh --header-border-char "="
 ```
 
 ## **4. Advanced Custom Parsing (`--parse`)**
@@ -129,7 +129,7 @@ ParseAI allows you to inject custom parsing logic directly from the command line
 *   **Regex**: `Save this code as:\s*(.+)`
 *   **Command**:
     ```bash
-    ./parser_ai/run_parser.sh --parse "Save this code as:\s*(.+)"
+    ./parseAI/run_parser.sh --parse "Save this code as:\s*(.+)"
     ```
 
 **Scenario B: The Bracket Style**
@@ -137,10 +137,10 @@ ParseAI allows you to inject custom parsing logic directly from the command line
 *   **Regex**: `\[FILE\]\s+(.+)`
 *   **Command**:
     ```bash
-    ./parser_ai/run_parser.sh --parse "\[FILE\]\s+(.+)"
+    ./parseAI/run_parser.sh --parse "\[FILE\]\s+(.+)"
     ```
 
-    ./parser_ai/run_parser.sh --parse "\[FILE\]\s+(.+)"
+    ./parseAI/run_parser.sh --parse "\[FILE\]\s+(.+)"
     ```
 
 ## **5. Recursive Processing**
@@ -158,7 +158,7 @@ You can mix and match flags for powerful workflows.
 This command numbers every file (so no code is lost), strips the "py_" helper prefix, and reconstructs the folder structure.
 
 ```bash
-./parser_ai/run_parser.sh -n -s "^py_" -s "^sh_" -r --merge-to ./full_project
+./parseAI/run_parser.sh -n -s "^py_" -s "^sh_" -r --merge-to ./full_project
 ```
 
 **Result:**

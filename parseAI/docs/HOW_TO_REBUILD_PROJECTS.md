@@ -22,7 +22,7 @@ ParseAI automates this by reading the **Output Path** directly from the chat cod
 ## **2. The Workflow: "Chat-Extract-Merge"**
 
 ### **Step A: The Prompt**
-Ensure your AI knows to output paths. (See `parser_ai/prompts/v1_standard.md`).
+Ensure your AI knows to output paths. (See `parseAI/prompts/v1_standard.md`).
 
 ### **Step B: The Chat**
 Iterate on your code.
@@ -35,10 +35,10 @@ Run ParseAI with the **Clean Project** flag.
 
 ```bash
 # Windows
-.\parser_ai\run_parser.ps1 --clean-project
+.\parseAI\run_parser.ps1 --clean-project
 
 # Linux/Mac
-./parser_ai/run_parser.sh --clean-project
+./parseAI/run_parser.sh --clean-project
 ```
 
 ### **Step D: The Result**
@@ -66,5 +66,5 @@ ParseAI applies a **"Last-Write-Wins"** strategy. It sequentially processes the 
 ## **4. Best Practices**
 
 1.  **Use `--clean-project` (`-cp`)**: This is the "Magic Button". It combines Reconstruction (`-r`) and Merging (`-m`) into a standard folder.
-2.  **Versioning in Headers**: Ask the AI to include a standard header (as shown in `parser_ai/prompts/v2_advanced.md`). This helps you verify which "version" of the file ended up in the project.
+2.  **Versioning in Headers**: Ask the AI to include a standard header (as shown in `parseAI/prompts/v2_advanced.md`). This helps you verify which "version" of the file ended up in the project.
 3.  **One Session per Feature**: Start a new chat session for major features to keep the log file size manageable and the `merged_project` context clean.

@@ -3,7 +3,7 @@
 This document serves as a "Direct Report" on the internal logic of the ParseAI codebase. It explains *how* the code works, file by file.
 
 ## **1. Core Entry Point: `run_parser.sh`**
-**Location**: `parser_ai/run_parser.sh`
+**Location**: `parseAI/run_parser.sh`
 
 This Bash script acts as the orchestrator for the entire pipeline.
 *   **Environment Setup**: Resolves the project root and sets `PYTHONPATH` to ensure Python imports work correctly.
@@ -13,7 +13,7 @@ This Bash script acts as the orchestrator for the entire pipeline.
     *   *Note*: It only attempts extraction if Phase 1 exits successfully (Exit Code 0).
 
 ## **2. The Log Converter: `json_parser.py`**
-**Location**: `parser_ai/apps/json_parser.py`
+**Location**: `parseAI/apps/json_parser.py`
 
 Responsible for ingesting Google AI Studio JSON exports and rendering them as human-readable Markdown.
 *   **Input**: Scans the `ingest/` directory for `.json` files.
@@ -25,7 +25,7 @@ Responsible for ingesting Google AI Studio JSON exports and rendering them as hu
 *   **Output**: Writes `.md`, `.html`, and `.pdf` files to `output/<SessionName>/`.
 
 ## **3. The Bridge: `markdown_extractor.py`**
-**Location**: `parser_ai/apps/markdown_extractor.py`
+**Location**: `parseAI/apps/markdown_extractor.py`
 
 A CLI wrapper around the core extraction logic.
 *   **Purpose**: Decouples the "files-on-disk" operations from the regex logic.
@@ -34,7 +34,7 @@ A CLI wrapper around the core extraction logic.
 *   **Recursive Logic**: If it detects extracted files are Markdown, it automatically calls `html_generator` and `pdf_generator` on them, and then recursively runs itself on that new file to find nested code blocks.
 
 ## **4. The Engine: `extractor.py`**
-**Location**: `parser_ai/apps/extractor.py`
+**Location**: `parseAI/apps/extractor.py`
 
 This class (`CodeExtractor`) contains the intelligence for identifying, naming, and saving code files.
 
@@ -66,7 +66,7 @@ If the `--reconstruct` flag is active, the extractor writes to **two** locations
 *   **Directory Validation**: Always ensures `os.makedirs(parent_dir)` is called before opening a file for writing.
 
 ## **5. The Document Layer: `html_generator.py`**
-**Location**: `parser_ai/apps/html_generator.py`
+**Location**: `parseAI/apps/html_generator.py`
 
 Responsible for producing rich HTML documentation.
 *   **Inputs**: Accepts either parsed JSON data (for chat logs) or raw Markdown string (for extracted files).
@@ -77,7 +77,7 @@ Responsible for producing rich HTML documentation.
     *   **Smart Rendering**: Uses the `markdown` library with `fenced_code` extensions to render tables and code blocks correctly.
 
 ## **6. The Printer: `pdf_generator.py`**
-**Location**: `parser_ai/apps/pdf_generator.py`
+**Location**: `parseAI/apps/pdf_generator.py`
 
 Converts the generated HTML into PDF format using `xhtml2pdf`.
 *   **Page Size**: Configurable via `--page-size` (Letter, A4, etc.).

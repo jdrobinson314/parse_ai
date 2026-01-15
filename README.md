@@ -40,7 +40,7 @@ cd parse_ai
 
 # 2. Ensure execution permissions (Linux/Mac)
 # 2. Ensure execution permissions (Linux/Mac)
-chmod +x parser_ai/run_parser.sh
+chmod +x parseAI/run_parser.sh
 # (Windows users can skip this step and use run_parser.ps1)
 ```
 
@@ -52,10 +52,10 @@ The included launcher script handles path discovery and execution.
 
 ```bash
 # Linux / MacOS
-./parser_ai/run_parser.sh
+./parseAI/run_parser.sh
 
 # Windows
-.\parser_ai\run_parser.ps1
+.\parseAI\run_parser.ps1
 ```
 
 *This processes every JSON file found in `ingest/` and saves results to `output/`.*
@@ -76,13 +76,13 @@ You can customize how files are named and organized using flags.
 
 ```bash
 # Run with numbering enabled and strip "temp_" from filenames
-./parser_ai/run_parser.sh -n --strip "^temp_"
+./parseAI/run_parser.sh -n --strip "^temp_"
 
 # Reconstruct directory structure from explicit paths
-./parser_ai/run_parser.sh --reconstruct
+./parseAI/run_parser.sh --reconstruct
 
 # Reconstruct and MERGE into a clean project structure (recommended)
-./parser_ai/run_parser.sh --reconstruct --merge-to ./final_project
+./parseAI/run_parser.sh --reconstruct --merge-to ./final_project
 ```
 
 ## **🧠 Intelligent Code Extraction**
@@ -131,7 +131,7 @@ Sometimes the AI puts the filename in its own tiny code block before the actual 
 ```text
 .
 ├── ingest/                  # DROP ZONE: Place Google AI Studio JSON exports here
-├── parser_ai/               # Core Application Code
+├── parseAI/               # Core Application Code
 │   ├── apps/
 │   │   ├── json_parser.py   # Log Processor: JSON -> MD/HTML/PDF
 │   │   ├── extractor.py     # Core Regex Engine & File Saver
@@ -147,12 +147,12 @@ Sometimes the AI puts the filename in its own tiny code block before the actual 
 
 ## **📚 Documentation & Resources**
 
-* [**Plugin Roadmap**](parser_ai/docs/PLUGIN_ROADMAP.md): Plans for supporting other LLM export formats.  
-* [**Prompting & Naming Guide**](parser_ai/docs/PROMPTING_AND_NAMING_GUIDE.md): **Crucial Reading.** The official protocol for "God Mode" system prompts to ensure perfect project generation.
-*   [**User Guide**](parser_ai/docs/USER_GUIDE.md): Complete instructions on installation, usage, and command-line arguments.
-*   [**How to Rebuild Projects**](parser_ai/docs/HOW_TO_REBUILD_PROJECTS.md): A guide on using ParseAI as a filesystem compiler.
-*   [**Example Prompts**](parser_ai/prompts/): System prompts (`v1`, `v2`) to configure your LLM for ParseAI.
-*   [**Source Code Reference**](parser_ai/docs/SOURCE_CODE_REFERENCE.md): A technical look at the internal logic of ParseAI's modules.
+* [**Plugin Roadmap**](parseAI/docs/PLUGIN_ROADMAP.md): Plans for supporting other LLM export formats.  
+* [**Prompting & Naming Guide**](parseAI/docs/PROMPTING_AND_NAMING_GUIDE.md): **Crucial Reading.** The official protocol for "God Mode" system prompts to ensure perfect project generation.
+*   [**User Guide**](parseAI/docs/USER_GUIDE.md): Complete instructions on installation, usage, and command-line arguments.
+*   [**How to Rebuild Projects**](parseAI/docs/HOW_TO_REBUILD_PROJECTS.md): A guide on using ParseAI as a filesystem compiler.
+*   [**Example Prompts**](parseAI/prompts/): System prompts (`v1`, `v2`) to configure your LLM for ParseAI.
+*   [**Source Code Reference**](parseAI/docs/SOURCE_CODE_REFERENCE.md): A technical look at the internal logic of ParseAI's modules.
 
 ## **License**
 

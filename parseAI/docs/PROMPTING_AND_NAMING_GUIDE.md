@@ -77,7 +77,7 @@ All executable files must start with the standard Linux interpreter and a unifor
     *   ` ```json:config/server.json `
 3.  **You Run**: 
     ```bash
-    ./parser_ai/run_parser.sh --reconstruct
+    ./parseAI/run_parser.sh --reconstruct
     ```
 4.  **ParseAI Delivers**:
     *   `reconstructed/config/server.json` (Exact structure preserved)
